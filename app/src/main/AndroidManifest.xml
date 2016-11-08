@@ -36,6 +36,11 @@
                 <category android:name="android.intent.category.PREFERENCE" />
             </intent-filter>
         </activity>
+        <provider
+            android:authorities="com.las.bestmovies.app"
+            android:name="com.las.bestmovies.Data.MoviesProvider"
+            android:exported="false"
+            android:syncable="true" />
     </application>
 
 </manifest>
