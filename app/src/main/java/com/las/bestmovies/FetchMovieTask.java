@@ -1,9 +1,12 @@
 package com.las.bestmovies;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.las.bestmovies.Data.MoviesContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,11 +18,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Vector;
 
-public class FetchMovieTask extends AsyncTask<String, Void, List<MovieObj>> {
-//movie_id = 188927;
+public class FetchMovieTask extends AsyncTask<String, Void, Void> {
+    //movie_id = 188927;
     private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
     private final String baseUrl = "http://api.themoviedb.org/3/movie/";
     private final String reviewsUrl = "http://api.themoviedb.org/3/movie/{movie_id}/reviews";
@@ -32,7 +34,8 @@ public class FetchMovieTask extends AsyncTask<String, Void, List<MovieObj>> {
     public FetchMovieTask(Context context) {
         mContext = context;
     }
-    private List<MovieObj> getMovieDataFromJson(String movieJsonStr)
+
+    private void getMovieDataFromJson(String movieJsonStr)
             throws JSONException {
 
         // These are the names of the JSON objects that need to be extracted.
@@ -45,39 +48,47 @@ public class FetchMovieTask extends AsyncTask<String, Void, List<MovieObj>> {
         final String vote_average = "vote_average";
         final String reviews = "vote_average";
 
-        //TODO change app from here and down
-        JSONArray movieArray = new JSONObject(movieJsonStr).getJSONArray(root);
+        try {
+            JSONArray movieArray = new JSONObject(movieJsonStr).getJSONArray(root);
+            JSONObject jsonNode;
 
-        ArrayList<MovieObj> movieList = new ArrayList<MovieObj>();
-        JSONObject jsonNode;
+            Vector<ContentValues> cVVector = new Vector<ContentValues>(movieArray.length());
 
-        for (int i = 0; i < movieArray.length(); i++) {
-            jsonNode = movieArray.getJSONObject(i);
-            MovieObj movie_item = new MovieObj(
-                    jsonNode.getString(overview),
-                    //jsonNode.getString(movie_id),
-                    jsonNode.getString(poster_path),
-                    jsonNode.getString(release_date),
-                    jsonNode.getString(title),
-                    jsonNode.getString(vote_average)
-            );
-            movieList.add(movie_item);
-            System.out.println(movie_item.toString());
+            for (int i = 0; i < movieArray.length(); i++) {
+                jsonNode = movieArray.getJSONObject(i);
+
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(MoviesContract.MoviesEntry.OVERVIEW, jsonNode.getString(overview));
+                contentValues.put(MoviesContract.MoviesEntry.TITLE, jsonNode.getString(title));
+                contentValues.put(MoviesContract.MoviesEntry.RELEASE_DATE, jsonNode.getString(release_date));
+                contentValues.put(MoviesContract.MoviesEntry.MOVIE_ID, jsonNode.getString(movie_id));
+                contentValues.put(MoviesContract.MoviesEntry.VOTES, jsonNode.getString(vote_average));
+                contentValues.put(MoviesContract.MoviesEntry.POSTER,jsonNode.getString(poster_path));
+
+                cVVector.add(contentValues);
+            }
+
+            int inserted = 0;
+            // add to database
+            if ( cVVector.size() > 0 ) {
+                ContentValues[] cvArray = new ContentValues[cVVector.size()];
+                cVVector.toArray(cvArray);
+                inserted = mContext.getContentResolver().bulkInsert(MoviesContract.MoviesEntry.CONTENT_URI, cvArray);
+            }
+
+            Log.d(LOG_TAG, "FetchMovieTask Complete. " + inserted + " Inserted");
+        }catch (JSONException e) {
+            Log.e(LOG_TAG, e.getMessage(), e);
+            e.printStackTrace();
         }
-
-        return movieList;
-
     }
 
-//    @Override
-//    protected void onPostExecute(List<MovieObj> movieObjList) {
-//        super.onPostExecute(movieObjList);
-//
-//        mImageAdapter.replace(movieObjList);
-//    }
-
     @Override
-    protected List<MovieObj> doInBackground(String... params) {
+    protected Void doInBackground(String... params) {
+
+        if (params.length == 0) {
+            return null;
+        }
 
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -105,7 +116,7 @@ public class FetchMovieTask extends AsyncTask<String, Void, List<MovieObj>> {
             StringBuffer buffer = new StringBuffer();
             if (inputStream == null) {
                 // Nothing to do.
-                movieJsonStr = null;
+                return null;
             }
             reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -119,18 +130,18 @@ public class FetchMovieTask extends AsyncTask<String, Void, List<MovieObj>> {
 
             if (buffer.length() == 0) {
                 // Stream was empty.  No point in parsing.
-                movieJsonStr = null;
-
+                return null;
             }
             movieJsonStr = buffer.toString();
-
+            getMovieDataFromJson(movieJsonStr);
             Log.v(LOG_TAG, "movie string: " + movieJsonStr);
 
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             // If the code didn't successfully get the weather data, there's no point in attempting
             // to parse it.
-            movieJsonStr = null;
+        } catch (JSONException e) {
+            e.printStackTrace();
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -143,15 +154,7 @@ public class FetchMovieTask extends AsyncTask<String, Void, List<MovieObj>> {
                 }
             }
         }
-
-        try {
-            return getMovieDataFromJson(movieJsonStr);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
         return null;
-
     }
 
 }
