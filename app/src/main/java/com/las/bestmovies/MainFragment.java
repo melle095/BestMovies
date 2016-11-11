@@ -49,10 +49,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
     // must change.
-    static final int COL_ID         = 1;
-    static final int COL_POSTER     = 2;
-    static final int COL_FAVORITES  = 3;
-    static final int COL_MOVIE_ID   = 4;
+    static final int COL_ID         = 0;
+    static final int COL_POSTER     = 1;
+    static final int COL_FAVORITES  = 2;
+    static final int COL_MOVIE_ID   = 3;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {

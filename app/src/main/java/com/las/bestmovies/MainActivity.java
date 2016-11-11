@@ -11,7 +11,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity implements MainFragment.Callback{
-
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +48,10 @@ public class MainActivity extends ActionBarActivity implements MainFragment.Call
             else
                 Toast.makeText(this,"No internet connection!", Toast.LENGTH_SHORT).show();
 
+        DetailFragment df = (DetailFragment)getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+        if ( null != df ) {
+            df.onMovieChanged();
+        }
 
     }
 

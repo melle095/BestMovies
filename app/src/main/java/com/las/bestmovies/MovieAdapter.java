@@ -67,7 +67,8 @@ public class MovieAdapter extends CursorAdapter {
 
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
-        //imageView.setAdjustViewBounds(true);
+        //viewHolder.posterView.setAdjustViewBounds(true);
+        viewHolder.posterView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         //imageView.setLayoutParams(new GridView.LayoutParams(85, 85))
 
         //imageView.setImageResource(mThumbIds[position]);
