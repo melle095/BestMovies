@@ -52,6 +52,7 @@ public class MovieAdapter extends CursorAdapter {
         ViewHolder viewHolder = new ViewHolder(view);
         view.setTag(viewHolder);
 
+
         return view;
     }
 
@@ -66,14 +67,14 @@ public class MovieAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
 
         ViewHolder viewHolder = (ViewHolder) view.getTag();
-
-        //imageView.setAdjustViewBounds(true);
-        //imageView.setLayoutParams(new GridView.LayoutParams(85, 85))
+//        ImageView imageView = (ImageView) view;
+//        imageView.setAdjustViewBounds(true);
+//        imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
 
         //imageView.setImageResource(mThumbIds[position]);
 //        if (cursor != null)
-        Picasso.with(context).load("http://image.tmdb.org/t/p/w185/" + cursor.getString(MainFragment.COL_POSTER)).into(viewHolder.posterView);
-
+        Picasso.with(context).load("http://image.tmdb.org/t/p/"+context.getString(R.string.MainPosterRes)+"/" + cursor.getString(MainFragment.COL_POSTER)).into(viewHolder.posterView);
+        //System.out.println("http://image.tmdb.org/t/p/w185/" + cursor.getString(MainFragment.COL_POSTER));
         //Picasso.with(mContext).load("http://i.imgur.com/DvpvklR.png").into(imageView);
     }
 
