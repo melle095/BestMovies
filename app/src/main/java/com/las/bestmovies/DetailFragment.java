@@ -1,6 +1,7 @@
 package com.las.bestmovies;
 
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -13,9 +14,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.las.bestmovies.Data.MoviesContract;
 import com.squareup.picasso.Picasso;
@@ -41,6 +44,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final int DETAIL_LOADER = 1;
 
     private Uri mUri;
+    private int favourite;
+    private String favouriteStr;
 
     TextView title;
     TextView overview;
@@ -49,6 +54,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     ImageView posterView;
     ListView reviewList;
     ListView trailersList;
+    Button mFavouriteButton;
+
 
     private static final String[] MOVIE_COLUMNS = {
 
@@ -106,7 +113,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         reviewList = (ListView) rootView.findViewById(R.id.listView_reviews);
         trailersList = (ListView) rootView.findViewById(R.id.listView_trailers);
-
+        mFavouriteButton = (Button) rootView.findViewById(R.id.detail_favourites);
+        mFavouriteButton.setBackgroundColor(getResources().getColor(R.color.colorTitle));
         return rootView;
     }
 
@@ -149,15 +157,54 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (data != null && data.moveToFirst()) {
             // Read weather condition ID from cursor
             //long moId = data.getInt(COL_WEATHER_CONDITION_ID);
+            mFavouriteButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
             title.setText(data.getString(COL_TITLE));
             overview.setText(data.getString(COL_OVERVIEW));
             vote_average.setText(data.getString(COL_VOTES));
             release_date.setText(data.getString(COL_RELEASE_DATE));
+            favourite = data.getInt(COL_FAVORITES);
+            System.out.println("Favorites: " + favourite);
             Picasso.with(getContext()).load(TMDB_IMG_URL + getString(R.string.DetailPosterRes) +"/" + data.getString(COL_POSTER)).into(posterView);
-
+            if(favourite == 1){
+                favouriteStr = getResources().getString(R.string.remove_favourites);
+            } else {
+                favouriteStr = getResources().getString(R.string.add_favourites);
+            }
             new MovieReviewLoader().execute(data.getString(COL_MOVIE_ID));
             new MovieTrailerLoader().execute(data.getString(COL_MOVIE_ID));
+            mFavouriteButton.setText(favouriteStr);
+            mFavouriteButton.setOnClickListener(new Button.OnClickListener(){
+
+                @Override
+                public void onClick(View view) {
+
+
+                    ContentValues favouriteValue = new ContentValues();
+                    String mSelectionClause = MoviesContract.MoviesEntry.MOVIE_ID + " = ?";
+                    String[] selectionArgs = {MoviesContract.MoviesEntry.getMovieIDFromUri(mUri)};
+
+                    if (favourite == 1) {
+                        favouriteValue.put(MoviesContract.MoviesEntry.FAVORITES, 0);
+                        getContext().getContentResolver().update(mUri, favouriteValue, mSelectionClause, selectionArgs);
+                        mFavouriteButton.setText(getResources().getString(R.string.remove_favourites));
+                        Toast.makeText(getContext(), getResources().getString(R.string.add_toast), Toast.LENGTH_SHORT).show();
+                        favourite = 0;
+                        favouriteValue.clear();
+                    }
+                    else if (favourite == 0){
+                        favouriteValue.put(MoviesContract.MoviesEntry.FAVORITES, 1);
+                        getContext().getContentResolver().update(mUri, favouriteValue, mSelectionClause, selectionArgs);
+                        mFavouriteButton.setText(getResources().getString(R.string.add_favourites));
+                        Toast.makeText(getContext(), getResources().getString(R.string.remove_toast), Toast.LENGTH_SHORT).show();
+                        favourite = 1;
+                        favouriteValue.clear();
+                    }
+                }
+
+            });
+
         }
+
     }
 
     /**

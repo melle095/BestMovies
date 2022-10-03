@@ -12,15 +12,28 @@ import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity implements MainFragment.Callback{
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
+    private boolean mTwoPane;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
-//            getSupportFragmentManager().beginTransaction()
-//                    .add(R.id.main_fragment, new MainFragment())
-//                    .commit();
+
+        if(findViewById(R.id.movie_detail_container) != null) {
+
+            mTwoPane = true;
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.movie_detail_container, new DetailFragment())
+                        .commit();
+            }
         }
+        else {
+            mTwoPane = false;
+        }
+    }
+
+    public boolean isTablet() {
+        return mTwoPane;
     }
 
     @Override

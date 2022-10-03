@@ -66,18 +66,23 @@
     <string name="settings_sort_key">sort_method</string>
     <string name="Top_rated_label">Top rated</string>
     <string name="Most_popular_label">Most popular</string>
+    <string name="Favorites_label">Favorites</string>
 
     <string name="Top_rated">top_rated</string>
     <string name="Most_popular">popular</string>
+    <string name="Favorites">favorites</string>
 
     <string-array name="sort_title">
         <item>@string/Top_rated_label</item>
         <item>@string/Most_popular_label</item>
+        <item>@string/Favorites_label</item>
+
     </string-array>
 
     <string-array name="sort_values">
         <item>@string/Top_rated</item>
         <item>@string/Most_popular</item>
+        <item>@string/Favorites</item>
     </string-array>
 
     <string name="settings_sort_default">@string/Most_popular</string>
@@ -86,5 +91,9 @@
     <string name="MainPosterRes">w500</string>
     <string name="DetailPosterRes">w154</string>
     <string name="trailer_watch">see</string>
+    <string name="add_favourites">Add To Favourites</string>
+    <string name="remove_favourites">Remove From Favourites</string>
+    <string name="add_toast">Added to favourites</string>
+    <string name="remove_toast">Removed from favourites</string>
 
 </resources>

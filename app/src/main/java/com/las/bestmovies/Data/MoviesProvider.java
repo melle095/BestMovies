@@ -145,8 +145,8 @@ public class MoviesProvider extends ContentProvider {
         int rowsUpdated;
 
         switch (match) {
+            case MOVIE_DETAIL:
             case MOVIES:
-                //normalizeDate(values);
                 rowsUpdated = db.update(MoviesContract.MoviesEntry.TABLE_NAME, values, selection,
                         selectionArgs);
                 break;
@@ -192,7 +192,7 @@ public class MoviesProvider extends ContentProvider {
 
         matcher.addURI(authority, MoviesContract.PATH_MOVIES, MOVIES);
         matcher.addURI(authority, MoviesContract.PATH_MOVIES   + "/#", MOVIE_DETAIL);
-        matcher.addURI(authority, MoviesContract.PATH_MOVIES_FAVORITES, MOVIE_FAVORITES);
+        matcher.addURI(authority, MoviesContract.PATH_FAVORITES, MOVIE_FAVORITES);
 
         return matcher;
     }

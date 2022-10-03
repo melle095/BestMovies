@@ -27,6 +27,8 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     private int mPosition = GridView.INVALID_POSITION;
     GridView gridView;
     MovieAdapter mMovieAdapter;
+    public boolean isTablet;
+    public boolean show_favorites = false;
 //    ArrayList<MovieObj> movieList;
 //    final String Parce_TAG = "MovieData";
 //    final String Save_TAG = "SaveMovieData";
@@ -72,12 +74,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        if(savedInstanceState == null || !savedInstanceState.containsKey(Save_TAG)) {
-//            movieList = new ArrayList<MovieObj>();
-//        }
-//        else {
-//            movieList = savedInstanceState.getParcelableArrayList(Save_TAG);
-//        }
         setHasOptionsMenu(true);
     }
 
@@ -85,8 +81,12 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onMovieUpdate() {
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         sort_method = mSharedPref.getString(getString(R.string.settings_sort_key), getString(R.string.settings_sort_default));
-        new FetchMovieTask(getActivity()).execute(sort_method);
-
+        if (sort_method == getString(R.string.Favorites))
+            show_favorites = true;
+        else {
+            show_favorites = false;
+            new FetchMovieTask(getActivity()).execute(sort_method);
+        }
         getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 
@@ -126,6 +126,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             // swapout in onLoadFinished.
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
+        isTablet = ((MainActivity) getActivity()).isTablet();
 
         return rootView;
     }
@@ -134,7 +135,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
         return new CursorLoader(getActivity(),
-                MoviesContract.MoviesEntry.CONTENT_URI,
+                (show_favorites? MoviesContract.MoviesEntry.CONTENT_FAVORITES_URI:MoviesContract.MoviesEntry.CONTENT_URI),
                 MOVIE_COLUMNS,
                 null,
                 null,
